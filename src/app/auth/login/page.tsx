@@ -9,8 +9,9 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth/auth-client';
 import { useRouter } from 'next/navigation';
 import EmailVerification from '@/app/auth/login/_components/email-verification';
+import { ForgotPassword } from '@/app/auth/login/_components/forgot-password';
 
-type Tab = 'signin' | 'signup' | 'email-verification';
+type Tab = 'signin' | 'signup' | 'email-verification' | 'forgot-password';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,7 +48,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             {/*    Sign In Form */}
-            <SignInTab />
+            <SignInTab
+              openEmailVerificationTab={openEmailVerificationTab}
+              openForgotPassword={() => setSelectedTab('forgot-password')}
+            />
           </CardContent>
           <Separator />
 
@@ -72,6 +76,7 @@ export default function LoginPage() {
           </CardFooter>
         </Card>
       </TabsContent>
+
       <TabsContent value="email-verification">
         <Card>
           <CardHeader className="text-2xl font-bold">
@@ -81,6 +86,17 @@ export default function LoginPage() {
             <EmailVerification email={email} />
           </CardContent>
           <Separator />
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="forgot-password">
+        <Card>
+          <CardHeader className="text-2xl font-bold">
+            <CardTitle>Forgot Password</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ForgotPassword openSignInTab={() => setSelectedTab('signin')} />
+          </CardContent>
         </Card>
       </TabsContent>
     </Tabs>

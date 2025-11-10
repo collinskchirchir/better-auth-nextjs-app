@@ -1,46 +1,63 @@
-"use client"
-import {z} from "zod";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {PasswordInput} from "@/components/ui/password-input";
-import {Button} from "@/components/ui/button";
-import {LoadingSwap} from "@/components/ui/loading-swap";
-import {authClient} from "@/lib/auth/auth-client";
-import {toast} from "sonner";
-import {useRouter} from "next/navigation";
+'use client';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
+import { Button } from '@/components/ui/button';
+import { LoadingSwap } from '@/components/ui/loading-swap';
+import { authClient } from '@/lib/auth/auth-client';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const signInSchema = z.object({
   email: z.email().min(1),
   password: z.string().min(1),
-})
+});
 
 type SignInForm = z.infer<typeof signInSchema>;
 
-export function SignInTab() {
+export function SignInTab({
+  openEmailVerificationTab,
+  openForgotPassword,
+}: {
+  openEmailVerificationTab: (email: string) => void;
+  openForgotPassword: () => void;
+}) {
   const router = useRouter();
   const form = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
-      password: ""
-    }
-  })
+      email: '',
+      password: '',
+    },
+  });
 
-  const {isSubmitting} = form.formState
+  const { isSubmitting } = form.formState;
 
   async function handleSignIn(data: SignInForm) {
     await authClient.signIn.email(
-      {...data, callbackURL: '/'},
+      { ...data, callbackURL: '/' },
       {
         onError: (error) => {
-          toast.error(error.error.message || "Failed to sign in");
+          if (error.error.code === 'EMAIL_NOT_VERIFIED') {
+            openEmailVerificationTab(data.email);
+          }
+          toast.error(error.error.message || 'Failed to sign in');
         },
         onSuccess: () => {
-          router.push("/")
-        }
-      })
+          router.push('/');
+        },
+      }
+    );
   }
 
   return (
@@ -49,26 +66,41 @@ export function SignInTab() {
         <FormField
           control={form.control}
           name="email"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="johndoe@gmail.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="johndoe@gmail.com"
+                  {...field}
+                />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
           name="password"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Password</FormLabel>
+                <Button
+                  onClick={openForgotPassword}
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="text-sm font-normal underline"
+                >
+                  Forgot password?
+                </Button>
+              </div>
               <FormControl>
                 <PasswordInput {...field} />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -78,5 +110,4 @@ export function SignInTab() {
       </form>
     </Form>
   );
-};
-
+}
