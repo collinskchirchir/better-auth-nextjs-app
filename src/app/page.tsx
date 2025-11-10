@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth/auth-client';
+import { BetterAuthActionButton } from '@/components/auth/better-auth-action-button';
 
 export default function Home() {
   const { data: session, isPending: loading } = authClient.useSession();
@@ -9,9 +10,8 @@ export default function Home() {
     return <div>Loading...</div>;
   }
   return (
-    <div
-      className="my-6 px-4 max-w-md mx-auto">
-      <div className="text-center space-y-6">
+    <div className="mx-auto my-6 max-w-md px-4">
+      <div className="space-y-6 text-center">
         {session === null ? (
           <>
             <h1 className="text-3xl font-bold">Welcome to Our App</h1>
@@ -22,13 +22,15 @@ export default function Home() {
         ) : (
           <>
             <h1 className="text-3xl font-bold">Welcome {session.user.name}</h1>
-            {/* TODO: Add Loading states */}
-            <Button variant="destructive" size="lg" onClick={() => authClient.signOut()}>
-              Sign In / Sign Up
-            </Button>
+            <BetterAuthActionButton
+              size="lg"
+              variant="destructive"
+              action={() => authClient.signOut()}
+            >
+              Sign Out
+            </BetterAuthActionButton>
           </>
-        )
-        }
+        )}
       </div>
     </div>
   );
